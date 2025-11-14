@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>eCEMS | Login</title>
+    <title>eCEMS | Register</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="css/index.css" type="text/css">
 </head>
@@ -14,28 +14,36 @@
             <img class="card__logo" src="image/uitm_logo.png" alt="UiTM Logo">
             <div class="card__title">
                 <h1>Welcome to UiTM eCEMS 👋🏻</h1>
-                <p>Sign in into your account</p>
+                <p>Sign up account for new user</p>
             </div>
 
             <!-- Login Form -->
             <form class="card__form" action="home.html" method="POST">
                 <div>
-                    <label for="studentNo">Student No.</label>
-                    <input name="studentNo" type="text" placeholder="Enter your Student No.">
+                    <label for="email">Email</label>
+                    <input name="email" type="text" placeholder="Enter your email">
+                </div>
+                <div>
+                    <label for="fullName">Full Name</label>
+                    <input name="fullName" type="text" placeholder="Enter your name">
+                </div>
+                <div>
+                    <label for="studentNo">Student Number</label>
+                    <input name="studentNo" type="text" placeholder="Enter your Student Number">
                 </div>
                 <div>
                     <label for="password">Password</label>
                     <input name="password" type="password" placeholder="············">
                 </div>
                 <div class="card__button">
-                    <button onclick="location.href='login.html'">Sign In</button>
+                    <button onclick="location.href='login.html'">Sign Up</button>
                 </div>
             </form>
             <!-- End Login Form-->
 
             <p class="card__footer">
-                New on our platform?
-                <a href="register.html">Create an account</a>
+                Already have an account?
+                <a href="login.html">Sign in instead</a>
             </p>
         </div>
         <!-- End Login/Sign Up -->
