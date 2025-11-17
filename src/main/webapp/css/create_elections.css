@@ -302,9 +302,15 @@ body {
 /* DataTables overrides for better alignment */
 table.dataTable thead th {
     border-bottom: 1px solid #dee2e6;
+    font-weight: 600;
+    color: #555;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 table.dataTable tbody td {
     vertical-align: middle;
+    font-size: 0.9rem;
 }
 
 .dt-container .bottom {
