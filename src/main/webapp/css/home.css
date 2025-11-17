@@ -20,6 +20,7 @@ body {
     flex-grow: 1;
     height: 100%;
     display: flex;
+    overflow: hidden;
 }
 
 .main__container {
