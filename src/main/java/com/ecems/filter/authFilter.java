@@ -5,6 +5,9 @@
 package com.ecems.filter;
 
 import java.io.IOException;
+
+import com.ecems.model.Student;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,6 +16,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
@@ -44,6 +48,15 @@ public class authFilter implements Filter {
         String contextPath = request.getContextPath();
         String uri = request.getRequestURI();
         String path = uri.substring(contextPath.length());
+
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            String role = (String) session.getAttribute("role");
+            if ("student".equals(role) && (path.equals("/") || path.equals("/index"))) {
+                request.getRequestDispatcher("/views/student/index.jsp").forward(request, response);
+                return;
+            }
+        }
         
         // Public Path (Static Resources, e.g.: CSS, JS, etc )
         if (
@@ -55,6 +68,8 @@ public class authFilter implements Filter {
                 path.equals("/login") ||
                 path.equals("/register") ||
 
+                path.equals("/logout") ||
+
                 // Partials
                 path.startsWith("/views/partials/")
             ) {
@@ -63,7 +78,6 @@ public class authFilter implements Filter {
         }
         
         fc.doFilter(request, response);
-
     }
 
     /**

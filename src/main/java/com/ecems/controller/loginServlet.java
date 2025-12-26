@@ -68,9 +68,9 @@ public class loginServlet extends HttpServlet {
         String stud_number = request.getParameter("stud_number");
         String password = request.getParameter("password");
 
-        if (stud_number == null || stud_number.isEmpty() || stud_number.length() != 10) 
+        if (stud_number == null || stud_number.isEmpty()) 
             errors.add("Student number cannot be empty");
-        if (password == null || password.isEmpty() || password.length() < 6) 
+        if (password == null || password.isEmpty()) 
             errors.add("Password cannot be empty");
 
         if (errors.isEmpty()) {
@@ -82,6 +82,7 @@ public class loginServlet extends HttpServlet {
             if (new_student != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("loggedUser", student);
+                session.setAttribute("role", "student");
 
                 response.sendRedirect(request.getContextPath() + "/");
                 return;
