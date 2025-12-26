@@ -21,6 +21,37 @@
                 <!-- Login Form -->
                 <form class="card__form" action="${pageContext.request.contextPath}/register" method="POST">
                     <div>
+                        <sql:query var="campusList" dataSource="${myDatasource}">
+                            SELECT * FROM CAMPUS
+                        </sql:query>
+                        <label for="campus_id">Campus</label>
+                        <select 
+                            name="campus_id" 
+                            onChange="javascript:location.href='${pageContext.request.contextPath}/register?campus=' + this.value"
+                        >
+                            <option value="-1" <c:if test="${param.campus == '-1' || param.campus == null}">selected</c:if>>Select Campus</option>
+                            <c:forEach var="campus" items="${campusList.rows}">
+                                <option value="${campus.campus_id}" <c:if test="${param.campus == campus.campus_id}">selected</c:if>>${campus.campus_name}</option> 
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div>
+                        <sql:query var="facultyList" dataSource="${myDatasource}">
+                            SELECT * FROM FACULTY WHERE CAMPUS_ID = ?::integer
+                            <sql:param value="${param.campus}"/>
+                        </sql:query>
+                        <label for="faculty_id">Faculty</label>
+                        <select 
+                            name="faculty_id" 
+                            <c:if test="${empty param.campus}">disabled</c:if>
+                        >
+                            <option value="-1" <c:if test="${param.campus == '-1' || param.campus == null}">selected</c:if>>Select Faculty</option>
+                            <c:forEach var="faculty" items="${facultyList.rows}">
+                                <option value="${faculty.faculty_id}">${faculty.faculty_name}</option> 
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div>
                         <label for="email">Email</label>
                         <input name="email" type="text" placeholder="Enter your email">
                     </div>
@@ -35,20 +66,6 @@
                     <div>
                         <label for="password">Password</label>
                         <input name="password" type="password" placeholder="············">
-                    </div>
-                    <div>
-                        <label for="campus_id">Campus</label>
-                        <select name="campus_id">
-                            <option value='-1'>Select Campus</option>
-                            <option value='1'>Kampus Shah Alam</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="faculty_id">Faculty</label>
-                        <select name="faculty_id">
-                            <option value='-1'>Select Faculty</option>
-                            <option value='1'>Faculty of Computer and Mathematical Science</option>
-                        </select>
                     </div>
                     <div class="card__button__container">
                         <button class="card__button" onclick="location.href='login.html'">Sign Up</button>
@@ -68,6 +85,22 @@
                 <img src="${pageContext.request.contextPath}/assets/image/banner.png" alt="Banner">
             </div>
             <!-- End Banner -->
+
+            <%-- Error Display Start --%>
+            <c:if test="${not empty errors}">
+                <div class="error">
+                    <c:forEach var="err" items="${errors}">
+                        <div class="error__item">
+                            <p>${err}</p>
+                            <svg style="cursor: pointer;" width="20" height="20" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="this.closest('.error__item').remove()">
+                                <path d="M112 682.24L688 106.24" stroke="currentColor" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M112 106.24L688 682.24" stroke="currentColor" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:if>
+            <%-- Error Display END --%>
         </main>
     </body>
 </html>

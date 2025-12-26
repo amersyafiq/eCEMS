@@ -21,12 +21,12 @@
                 <!-- Login Form -->
                 <form class="card__form" action="${pageContext.request.contextPath}/login" method="POST">
                     <div>
-                        <label for="studentNo">Student No.</label>
-                        <input name="" type="text" placeholder="Enter your Student No.">
+                        <label for="stud_number">Student No.</label>
+                        <input name="stud_number" type="text" placeholder="Enter your Student No.">
                     </div>
                     <div>
                         <label for="password">Password</label>
-                        <input name="" type="password" placeholder="············">
+                        <input name="password" type="password" placeholder="············">
                     </div>
                     <div class="card__button__container">
                         <button class="card__button" type="submit">Sign In</button>
@@ -46,6 +46,22 @@
                 <img src="${pageContext.request.contextPath}/assets/image/banner.png" alt="Banner">
             </div>
             <!-- End Banner -->
+
+            <%-- Error Display Start --%>
+            <c:if test="${not empty errors}">
+                <div class="error">
+                    <c:forEach var="err" items="${errors}">
+                        <div class="error__item">
+                            <p>${err}</p>
+                            <svg style="cursor: pointer;" width="20" height="20" viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="this.closest('.error__item').remove()">
+                                <path d="M112 682.24L688 106.24" stroke="currentColor" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M112 106.24L688 682.24" stroke="currentColor" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </c:forEach>
+                </div>
+            </c:if>
+            <%-- Error Display END --%>
         </main>
     </body>
 </html>

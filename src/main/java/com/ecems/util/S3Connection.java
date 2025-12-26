@@ -24,7 +24,7 @@ public class S3Connection {
     private static final String ACCESS_KEY = "4b842fe3695317546abfe32b4063bbfa";
     private static final String SECRET_KEY = "103bf94859fa99d1d188b9078ead42cc75d1cb65a2efdae079a25554e7bd7818";
 
-    private static final Region REGION = Region.AP_SOUTHEAST_2; 
+    private static final Region REGION = Region.AP_NORTHEAST_1; 
     private static S3Client client;
 
     public static S3Client getClient() {

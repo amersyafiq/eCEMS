@@ -6,7 +6,6 @@ package com.ecems.dao;
 
 import com.ecems.model.Student;
 import com.ecems.util.DBConnection;
-import com.ecems.util.passwordHash;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,13 +23,13 @@ public class StudentDAO {
     private ResultSet rs;
 
     private static final String INSERT_STUDENT_SQL =
-        "INSERT INTO STUDENT (full_name, stud_number, email, password, is_active, campus_id, faculty_id) VALUES (?, ?, ?, ?, TRUE, ?, ?)";
+        "INSERT INTO STUDENTS (full_name, stud_number, email, password, is_active, campus_id, faculty_id) VALUES (?, ?, ?, ?, TRUE, ?, ?)";
 
     private static final String GET_STUDENT_BY_STUDNUM_PASSWORD =
-        "SELECT * FROM STUDENT WHERE STUD_NUMBER = ? AND PASSWORD = ?";
+        "SELECT * FROM STUDENTS WHERE STUD_NUMBER = ? AND PASSWORD = ?";
 
     private static final String GET_STUDENT_BY_STUDNUM =
-        "SELECT * FROM STUDENT WHERE STUD_NUMBER = ?";
+        "SELECT * FROM STUDENTS WHERE STUD_NUMBER = ?";
 
     // Used by registerServlet
     public Student createStudent(Student student) {

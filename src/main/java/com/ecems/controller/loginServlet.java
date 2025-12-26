@@ -18,13 +18,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /**
  *
  * @author ASUS
  */
-@WebServlet("/register")
-public class registerServlet extends HttpServlet {
+@WebServlet("/login")
+public class loginServlet extends HttpServlet {
 
     private StudentDAO studentDAO;
 
@@ -46,7 +47,7 @@ public class registerServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        RequestDispatcher view = request.getRequestDispatcher("/views/register.jsp");
+        RequestDispatcher view = request.getRequestDispatcher("/views/login.jsp");
         view.forward(request, response);
     }
 
@@ -61,55 +62,36 @@ public class registerServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         List<String> errors = new ArrayList<>();
-
-        String full_name = request.getParameter("full_name");
+        
         String stud_number = request.getParameter("stud_number");
-        String email = request.getParameter("email");
         String password = request.getParameter("password");
-        String campusParam = request.getParameter("campus_id");
-        String facultyParam = request.getParameter("faculty_id");
 
-        int campus_id = -1;
-        int faculty_id = -1;
-        if (campusParam != null && !campusParam.isEmpty())
-                campus_id = Integer.parseInt(campusParam);
-        if (facultyParam != null && !facultyParam.isEmpty()) 
-                faculty_id = Integer.parseInt(facultyParam);
-
-        if (full_name == null || full_name.isEmpty() || full_name.length() < 6) 
-            errors.add("Full name must be at least 6 characters");
         if (stud_number == null || stud_number.isEmpty() || stud_number.length() != 10) 
-            errors.add("Student number must be 10 digits");
-        if (email == null || email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) 
-            errors.add("Email must be in valid format");
+            errors.add("Student number cannot be empty");
         if (password == null || password.isEmpty() || password.length() < 6) 
-            errors.add("Password must be at least 6 characters");
-        if (campus_id == -1) 
-            errors.add("Choose a campus");
-        if (faculty_id == -1) 
-            errors.add("Choose a faculty");
-        if (studentDAO.checkStudentNumber(stud_number) != null)
-            errors.add("Student number is already registered");
+            errors.add("Password cannot be empty");
 
         if (errors.isEmpty()) {
             Student student = new Student();
-            student.setFull_name(full_name);
             student.setStud_number(stud_number);
-            student.setEmail(email);
             student.setPassword(passwordHash.doHashing(password));
-            student.setCampus_id(campus_id);
-            student.setFaculty_id(faculty_id);
+            
+            Student new_student = studentDAO.authenticateStudent(student);
+            if (new_student != null) {
+                HttpSession session = request.getSession();
+                session.setAttribute("loggedUser", student);
 
-            if (studentDAO.createStudent(student) != null)
-                response.sendRedirect(request.getContextPath() + "/login");
-        } else {
-            request.setAttribute("errors", errors);
-            request.getRequestDispatcher("/views/register.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/");
+                return;
+            } else {
+                errors.add("Wrong student number or password");
+            }
         }
 
+        request.setAttribute("errors", errors);
+        request.getRequestDispatcher("/views/login.jsp").forward(request, response);
     }
-
 
 }

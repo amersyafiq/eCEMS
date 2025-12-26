@@ -22,6 +22,7 @@ main {
     display: flex;
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
 .card {
@@ -112,11 +113,13 @@ main {
     margin-bottom: 0.25rem;
 }
 
-.card__form > div > input, .card__form > div > select {
-    height: 1.5rem;
-    padding: 1rem;
+.card__form > div > input,
+.card__form > div > select {
+    padding: 0.5rem 0.75rem;
     border: 1px solid rgba(47, 43, 61, 0.22);
     border-radius: 6px;
+    color: black;
+    background-color: white;
 }
 
 .card__form > .card__button__container {
@@ -145,4 +148,29 @@ main {
 
 .banner > img {
     height: 45rem;
+}
+
+.error {
+    position: absolute;
+    height: fit-content;
+    width: 25rem;
+    right: 0;
+    bottom: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    padding: 1rem;
+    gap: 0.5rem;
+}
+
+.error__item {
+    background-color: #edcac7;
+    border: 1px solid #9b272a;
+    padding: 1rem;
+    border-radius: 5px;
+    color: #9b272a;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
 }
