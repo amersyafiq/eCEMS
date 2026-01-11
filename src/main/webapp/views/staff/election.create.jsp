@@ -225,13 +225,13 @@
                         components: {
                             calendar: true,
                             date: true,
-                            seconds: true,
+                            seconds: false,
                             useTwentyfourHour: true
                         },
                         theme: 'light'
                     },
                     localization: {
-                        format: 'yyyy-MM-dd HH:mm:ss',
+                        format: 'yyyy-MM-dd HH:mm:00',
                     }
                 };
 
@@ -290,6 +290,9 @@
                 });
 
                 $('#create_btn').on('click', function() {
+                    if (!confirm('Are you sure you want to create this election?')) {
+                        return;
+                    }
                     const form = $('#create_form')[0]; 
                     if (form.reportValidity()) { 
                         form.submit(); 

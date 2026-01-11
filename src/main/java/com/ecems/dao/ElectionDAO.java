@@ -28,6 +28,26 @@ public class ElectionDAO {
         "status, campus_id, faculty_id, created_by, candidacy_open, max_votes) " +
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+    private static final String UPDATE_ELECTION_SQL =
+        "UPDATE ELECTIONS " +
+        "SET TITLE = ?, " +
+        "DESCRIPTION = ?, " +
+        "SESSION = ?, " +
+        "ELECTION_TYPE = ?, " +
+        "START_DATE = ?, " +
+        "END_DATE = ?, " +
+        "STATUS = ?, " +
+        "CAMPUS_ID = ?, " +
+        "FACULTY_ID = ?, " +
+        "CANDIDACY_OPEN = ?, " +
+        "MAX_VOTES = ? " +
+        "WHERE ELECTION_ID = ? ";
+
+    private static final String CHANGE_ELECTION_STATUS =
+        "UPDATE ELECTIONS " +
+        "SET STATUS = ? " +
+        "WHERE ELECTION_ID = ? ";
+
     public Election getElectionByID(int election_id) {
         try {
             conn = DBConnection.createConnection();
@@ -59,7 +79,13 @@ public class ElectionDAO {
             pstmt.setTimestamp(6, java.sql.Timestamp.valueOf(election.getEnd_date()));
             pstmt.setString(7, election.getStatus());
             pstmt.setInt(8, election.getCampus_id());
-            pstmt.setInt(9, election.getFaculty_id());
+
+            if (election.getFaculty_id() != 0) {
+                pstmt.setInt(9, election.getFaculty_id());
+            } else {
+                pstmt.setNull(9, java.sql.Types.INTEGER);
+            }
+
             pstmt.setInt(10, election.getCreated_by());
             pstmt.setBoolean(11, election.isCandidacy_open());
             pstmt.setInt(12, election.getMax_votes());
@@ -70,6 +96,64 @@ public class ElectionDAO {
             conn.close();
 
             return election;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Election updateElectionByID(Election election) {
+        try {
+            conn = DBConnection.createConnection();
+            pstmt = conn.prepareStatement(UPDATE_ELECTION_SQL);
+
+            pstmt.setString(1, election.getTitle());
+            pstmt.setString(2, election.getDescription());
+            pstmt.setString(3, election.getSession());
+            pstmt.setString(4, election.getElection_type());
+            pstmt.setTimestamp(5, java.sql.Timestamp.valueOf(election.getStart_date()));
+            pstmt.setTimestamp(6, java.sql.Timestamp.valueOf(election.getEnd_date()));
+            pstmt.setString(7, election.getStatus());
+            pstmt.setInt(8, election.getCampus_id());
+
+            if (election.getFaculty_id() != 0) {
+                pstmt.setInt(9, election.getFaculty_id());
+            } else {
+                pstmt.setNull(9, java.sql.Types.INTEGER);
+            }
+
+            pstmt.setBoolean(10, election.isCandidacy_open());
+            pstmt.setInt(11, election.getMax_votes());
+            pstmt.setInt(12, election.getElection_id());
+
+            pstmt.executeUpdate();
+
+            pstmt.close();
+            conn.close();
+
+            return getElectionByID(election.getElection_id());
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Election updateElectionStatus(int election_id, String status) {
+        try {
+            conn = DBConnection.createConnection();
+            pstmt = conn.prepareStatement(CHANGE_ELECTION_STATUS);
+
+            pstmt.setString(1, status);
+            pstmt.setInt(2, election_id);
+
+            pstmt.executeUpdate();
+
+            pstmt.close();
+            conn.close();
+
+            return getElectionByID(election_id);
 
         } catch (SQLException e) {
             e.printStackTrace();

@@ -4,10 +4,11 @@
  */
 package com.ecems.controller;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.Enumeration;
+import java.util.List;
 
 import com.ecems.dao.CandidateDAO;
 import com.ecems.dao.ElectionDAO;
@@ -21,6 +22,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -62,37 +64,58 @@ public class electionPageServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-        int election_id = Integer.parseInt(pathInfo.substring(1));
-        
-        Election election = electionDAO.getElectionByID(election_id);
-        if (election != null) {
-            String status = election.getStatus();
-            String view;
 
-            switch(status) {
-                case "upcoming":
-                    view = "/views/student/page.upcoming.jsp";
-                    break;
+        try {
+            int election_id = Integer.parseInt(pathInfo.substring(1));
+            Election election = electionDAO.getElectionByID(election_id);
 
-                case "active":
-                    view = "/views/student/page.active.jsp";
-                    break;
-
-                case "closed":
-                    view = "/views/student/page.closed.jsp";
-                    break;
-
-                default:
-                    response.sendError(HttpServletResponse.SC_NOT_FOUND);
-                    return;
+            if (election == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
             }
 
-            request.setAttribute("election", election);
-            request.getRequestDispatcher(view).forward(request, response);
-            return;
-        } else {
+            HttpSession session = request.getSession(false);
+            String role = (session != null) ? (String) session.getAttribute("role") : null;
+            String status = election.getStatus();
+            String view = null;
+
+            switch (role.toLowerCase()) {
+                case "staff":
+                    switch (status.toLowerCase()) {
+                        case "upcoming":
+                        case "active":
+                            view = "/views/staff/election.modify.jsp";
+                            break;
+                        case "closed":
+                            view = "/views/staff/election.view.jsp";
+                            break;
+                    }
+                    break;
+
+                case "student":
+                    switch (status.toLowerCase()) {
+                        case "upcoming":
+                            view = "/views/student/election.upcoming.jsp";
+                            break;
+                        case "active":
+                            view = "/views/student/election.active.jsp";
+                            break;
+                        case "closed":
+                            view = "/views/student/election.closed.jsp";
+                            break;
+                    }
+                    break;
+            }
+
+            if (view != null) {
+                request.setAttribute("election", election);
+                request.getRequestDispatcher(view).forward(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid election status for this role.");
+            }
+
+        } catch (NumberFormatException e) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
         }
            
     }
@@ -114,6 +137,15 @@ public class electionPageServlet extends HttpServlet {
             switch (action) {
                 case "register_candidate":
                     registerCandidate(request, response);
+                    break;
+                case "update_election":
+                    updateElection(request, response);
+                    break;
+                case "start_election":
+                    startElection(request, response);
+                    break;
+                case "cancel_election":
+                    cancelElection(request, response);
                     break;
                 default:
                     response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -243,7 +275,113 @@ public class electionPageServlet extends HttpServlet {
         Election election = electionDAO.getElectionByID(election_id);
         request.setAttribute("election", election);
         request.setAttribute("error", errorMsg);
-        request.getRequestDispatcher("/views/student/page.upcoming.jsp").forward(request, response);
+        request.getRequestDispatcher("/views/student/election.upcoming.jsp").forward(request, response);
     }
 
+    // Update election only for upcoming status
+    private void updateElection(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+            int election_id = Integer.parseInt(request.getParameter("election_id"));
+            int campus_id = Integer.parseInt(request.getParameter("campus_id"));
+            
+            int max_votes = Integer.parseInt(request.getParameter("max_votes"));
+
+            boolean isFacultySpecific = request.getParameter("is_faculty_specific") != null;
+            String facultyIdStr = request.getParameter("faculty_id");
+            int faculty_id;
+            String election_type;
+            if (isFacultySpecific && facultyIdStr != null && !facultyIdStr.isEmpty()) {
+                faculty_id = Integer.parseInt(facultyIdStr);
+                election_type = "faculty";
+            } else {
+                faculty_id = 0;
+                election_type = "campus";
+            }
+            
+            String title = request.getParameter("title");
+            String description = request.getParameter("description");
+            String session = request.getParameter("session");
+
+            String startDateStr = request.getParameter("start_date");
+            String endDateStr = request.getParameter("end_date");
+            LocalDateTime start_date = null, end_date = null;
+            if (startDateStr != null && !startDateStr.isEmpty()) {
+                start_date = LocalDateTime.parse(startDateStr.replace(" ", "T"));
+            }
+            if (endDateStr != null && !endDateStr.isEmpty()) {
+                end_date = LocalDateTime.parse(endDateStr.replace(" ", "T"));
+            }
+            
+            String openCandidacyStr = request.getParameter("candidacy_open");
+            boolean candidacy_open = (openCandidacyStr != null && openCandidacyStr.equals("true"));
+
+            Election election = new Election();
+            election.setTitle(title);
+            election.setDescription(description);
+            election.setSession(session);
+            election.setElection_type(election_type);
+            election.setStart_date(start_date);
+            election.setEnd_date(end_date);
+            election.setStatus("upcoming");
+            election.setCampus_id(campus_id);
+            election.setFaculty_id(faculty_id);
+            election.setCandidacy_open(candidacy_open);
+            election.setMax_votes(max_votes);
+            election.setElection_id(election_id);
+
+            if (electionDAO.updateElectionByID(election) != null) {
+                response.sendRedirect(request.getContextPath() + "/elections/page/" + election_id);
+                return;
+            }
+
+            Election updated_election = electionDAO.getElectionByID(election_id);
+            request.setAttribute("election", updated_election);
+            request.setAttribute("error", "Failed to update the election");
+            request.getRequestDispatcher("/views/staff/election.modify.jsp").forward(request, response);
+    }
+
+    private void startElection(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+            int election_id = Integer.parseInt(request.getParameter("election_id"));
+            String status = "active";
+
+            List<Candidate> candidates = candidateDAO.getApprovedCandidatesByElection(election_id);
+
+            if (candidates == null || candidates.size() < 2) {
+                Election election = electionDAO.getElectionByID(election_id);
+                request.setAttribute("election", election);
+                request.setAttribute("error", "Cannot start election. There must be at least 2 approved candidates.");
+                request.getRequestDispatcher("/views/staff/election.modify.jsp").forward(request, response);
+                return;
+            }
+
+            if (electionDAO.updateElectionStatus(election_id, status) != null) {
+                response.sendRedirect(request.getContextPath() + "/elections/page/" + election_id);
+                return;
+            }
+
+            Election updated_election = electionDAO.getElectionByID(election_id);
+            request.setAttribute("election", updated_election);
+            request.setAttribute("error", "Failed to start the election due to a database error.");
+            request.getRequestDispatcher("/views/staff/election.modify.jsp").forward(request, response);
+    }
+
+    private void cancelElection(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+            int election_id = Integer.parseInt(request.getParameter("election_id"));
+            String status = "cancelled";
+
+            if (electionDAO.updateElectionStatus(election_id, status) != null) {
+                response.sendRedirect(request.getContextPath() + "/elections/page/" + election_id);
+                return;
+            }
+
+            Election updated_election = electionDAO.getElectionByID(election_id);
+            request.setAttribute("election", updated_election);
+            request.setAttribute("error", "Failed to cancel the election");
+            request.getRequestDispatcher("/views/staff/election.modify.jsp").forward(request, response);
+    }
 }

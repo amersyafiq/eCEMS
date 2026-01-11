@@ -65,17 +65,15 @@ public class electionCreateServlet extends HttpServlet {
             
             int max_votes = Integer.parseInt(request.getParameter("max_votes"));
 
-            String facultyStr = request.getParameter("faculty_id");
-            Integer faculty_id = (facultyStr != null && !facultyStr.isEmpty()) ? Integer.parseInt(facultyStr) : null;
-
             boolean isFacultySpecific = request.getParameter("is_faculty_specific") != null;
             String facultyIdStr = request.getParameter("faculty_id");
             String election_type;
+            int faculty_id;
             if (isFacultySpecific && facultyIdStr != null && !facultyIdStr.isEmpty()) {
                 faculty_id = Integer.parseInt(facultyIdStr);
                 election_type = "faculty";
             } else {
-                election_type = null;
+                faculty_id = 0;
                 election_type = "campus";
             }
             
@@ -113,9 +111,9 @@ public class electionCreateServlet extends HttpServlet {
             if (electionDAO.createElection(election) != null) {
                 response.sendRedirect(request.getContextPath() + "/elections");
                 return;
-            } else {
-                request.setAttribute("error", "Failed to create an election");
-                request.getRequestDispatcher("/views/staff/election.create.jsp").forward(request, response);
             }
+
+            request.setAttribute("error", "Failed to create an election");
+            request.getRequestDispatcher("/views/staff/election.create.jsp").forward(request, response);
     }
 }

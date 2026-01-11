@@ -30,6 +30,12 @@
         <sql:param value="${loggedUser.stud_id}" />
     </sql:query>
     <c:set var="isCandidate" value="${registeredCandidate.rows[0]}" />
+
+    <sql:query dataSource="${myDatasource}" var="candidates">
+        SELECT COUNT(*) AS COUNT FROM CANDIDATES WHERE ELECTION_ID = ?
+        <sql:param value="${election.election_id}" />
+    </sql:query>
+    <c:set var="countCandidate" value="${candidates.rows[0]}" />
     
     <body style="background-color: #121026">
         <div class="d-flex vh-100 overflow-hidden">
@@ -138,7 +144,7 @@
                                             <h3 class="h6 text-white fw-semibold mb-0">Students</h3>
                                             <p class="small text-white opacity-75 mb-0">Registered Candidacy</p>
                                         </div>
-                                        <div class="display-4 fw-bold text-white">${counts.upcoming_count != null ? counts.upcoming_count : 0}</div>
+                                        <div class="display-4 fw-bold text-white">${countCandidate.count != null ? countCandidate.count : 0}</div>
                                     </div>
                                 </div>
                             </div>
@@ -164,14 +170,14 @@
                                     <div class="d-flex flex-grow-1">
                                         <p class="m-0 d-block">Created On</p>
                                         <p class="m-0 flex-grow-1 fw-semibold text-end">
-                                            <fmt:parseDate  value="${election.created_at}"  type="date" pattern="yyyy-MM-dd" var="parsedCreated" />
+                                            <fmt:parseDate  value="${election.created_at}" type="date" pattern="yyyy-MM-dd" var="parsedCreated" />
                                             <fmt:formatDate pattern="EEEE, MMM dd, yyyy" value="${parsedCreated}"/>
                                         </p>
                                     </div>
                                     <div class="d-flex flex-grow-1">
                                         <p class="m-0 d-block">Starting On</p>
                                         <p class="m-0 flex-grow-1 fw-semibold text-end">
-                                            <fmt:parseDate  value="${election.start_date}"  type="date" pattern="yyyy-MM-dd" var="parsedStart" />
+                                            <fmt:parseDate  value="${election.start_date}" type="date" pattern="yyyy-MM-dd" var="parsedStart" />
                                             <fmt:formatDate pattern="EEEE, MMM dd, yyyy" value="${parsedStart}"/>
                                         </p>
                                     </div>

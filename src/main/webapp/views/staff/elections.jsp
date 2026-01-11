@@ -177,12 +177,21 @@
                                         <td><img src="https://i.pravatar.cc/32?img=1" alt="Staff Profile" class="avatar">${election.full_name}</td>
                                         <td><fmt:formatDate value="${election.created_at}" pattern="dd MMM yyyy, h:mm a"/></td>
                                         <td>
-                                            <a href="${pageContext.request.contextPath}/elections/page/${election.election_id}" class="action-link">
+                                            <a href="${pageContext.request.contextPath}/elections/page/${election.election_id}" class="action-link d-flex align-items-center">
                                                 <c:choose>
                                                     <c:when test="${election.status == 'closed' || election.status == 'cancelled'}">
+                                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <circle cx="9.99992" cy="10.0002" r="1.66667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                            <path d="M18.3334 9.99984C16.1109 13.889 13.3334 15.8332 10.0001 15.8332C6.66675 15.8332 3.88925 13.889 1.66675 9.99984C3.88925 6.11067 6.66675 4.1665 10.0001 4.1665C13.3334 4.1665 16.1109 6.11067 18.3334 9.99984" stroke="#7367F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
                                                         View
                                                     </c:when>
                                                     <c:otherwise>
+                                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                            <path d="M7.49992 5.83325H4.99992C4.07944 5.83325 3.33325 6.57944 3.33325 7.49992V14.9999C3.33325 15.9204 4.07944 16.6666 4.99992 16.6666H12.4999C13.4204 16.6666 14.1666 15.9204 14.1666 14.9999V12.4999" stroke="#7367F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                            <path d="M7.5 12.5H10L17.0833 5.41669C17.7737 4.72634 17.7737 3.60705 17.0833 2.91669C16.393 2.22634 15.2737 2.22634 14.5833 2.91669L7.5 10V12.5" stroke="#7367F0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                            <path d="M13.3333 4.16675L15.8333 6.66675" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                        </svg>
                                                         Modify
                                                     </c:otherwise>
                                                 </c:choose>

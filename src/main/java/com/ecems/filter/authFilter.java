@@ -50,22 +50,15 @@ public class authFilter implements Filter {
         String path = uri.substring(contextPath.length());
 
         HttpSession session = request.getSession(false);
-        if (session != null) {
-            String role = (String) session.getAttribute("role");
-            if ("student".equals(role) && (path.equals("/") || path.equals("/index"))) {
-                request.getRequestDispatcher("/views/student/index.jsp").forward(request, response);
-                return;
-            } else if ("staff".equals(role) && (path.equals("/") || path.equals("/index"))) {
-                request.getRequestDispatcher("/views/staff/index.jsp").forward(request, response);
-                return;
-            }
-        }
         
         // Public Path (Static Resources, e.g.: CSS, JS, etc )
         if (
                 // Index
-                path.equals("/") ||
-                path.equals("/index") ||
+                (
+                    session == null &&
+                    (path.equals("/") ||
+                    path.equals("/index"))
+                ) ||
                 
                 // Login or Register
                 path.equals("/login") ||
@@ -73,11 +66,46 @@ public class authFilter implements Filter {
 
                 path.equals("/logout") ||
 
+                // Static resources
+                path.startsWith("/assets/") ||
+                
                 // Partials
                 path.endsWith(".jspf")
             ) {
             fc.doFilter(request, response);
             return;
+        }
+
+        String role = (session == null) ? null : (String) session.getAttribute("role");
+
+        if (role == null) {
+            response.sendRedirect(contextPath + "/login");
+            return;
+        }
+
+        if (path.startsWith("/views/student/") && !"student".equalsIgnoreCase(role)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Student only.");
+            return;
+        }
+
+        if (path.startsWith("/views/staff/") && !"staff".equalsIgnoreCase(role)) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Staff only.");
+            return;
+        }
+
+        if (path.equals("/") || path.equals("/index")) {
+            String dashboardPath = "";
+            
+            if ("student".equalsIgnoreCase(role)) {
+                dashboardPath = "/views/student/index.jsp";
+            } else if ("staff".equalsIgnoreCase(role)) {
+                dashboardPath = "/views/staff/index.jsp";
+            }
+
+            if (!dashboardPath.isEmpty()) {
+                request.getRequestDispatcher(dashboardPath).forward(request, response);
+                return;
+            }
         }
         
         fc.doFilter(request, response);

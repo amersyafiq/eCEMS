@@ -233,12 +233,6 @@
                                                     <span class="badge rounded-pill bg-white px-3 py-2 align-self-start fw-normal text-black border border-1 border-secondary">
                                                         Ending in ${election.ENDING_IN} days
                                                     </span>
-                                                    <p class="small text-secondary mb-0">
-                                                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="me-1">
-                                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                                                        </svg>
-                                                        Ending <fmt:formatDate value="${election.end_date}" pattern="MMM dd, yyyy"/>
-                                                    </p>
                                                 </c:when>
                                                 <c:when test="${election.status == 'closed'}">
                                                     <span class="badge rounded-pill bg-white px-3 py-2 align-self-start fw-normal text-black border border-1 border-secondary">

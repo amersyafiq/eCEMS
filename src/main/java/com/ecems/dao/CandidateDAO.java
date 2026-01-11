@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * DAO for Candidate Management
@@ -20,9 +22,12 @@ public class CandidateDAO {
     private ResultSet rs;
 
     private static final String INSERT_CANDIDATE_SQL = 
-        "INSERT INTO candidates " +
-        "(manifesto, photo_url, banner_url, slogan, election_id, student_id) " +
+        "INSERT INTO CANDIDATES " +
+        "(MANIFESTO, PHOTO_URL, BANNER_URL, SLOGAN, ELECTION_ID, STUDENT_ID) " +
         "VALUES (?, ?, ?, ?, ?, ?)";
+
+    private static final String GET_CANDIDATES_BY_ELECTIONID =
+        "SELECT * FROM CANDIDATES WHERE STATUS = 'approved' AND ELECTION_ID = ? ";
 
     public boolean createCandidate(Candidate candidate) {
         try {
@@ -43,6 +48,29 @@ public class CandidateDAO {
             e.printStackTrace();
         } 
         return false;
+    }
+
+    public List<Candidate> getApprovedCandidatesByElection(int election_id) {
+        List<Candidate> candidates = new ArrayList<>();
+        try {
+            conn = DBConnection.createConnection();
+            pstmt = conn.prepareStatement(GET_CANDIDATES_BY_ELECTIONID);
+            pstmt.setInt(1, election_id);
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                candidates.add(extractCandidate(rs));
+            }
+            
+            rs.close();
+            pstmt.close();
+            conn.close();
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return candidates;
     }
 
     private Candidate extractCandidate(ResultSet rs) throws SQLException {
