@@ -57,6 +57,21 @@
                 <span class="small">Elections</span>
             </a>
         </li>
+
+        <li class="nav-item w-100">
+            <a href="${pageContext.request.contextPath}/report" 
+               class="nav-link-custom d-flex flex-column align-items-center py-3 text-decoration-none <c:if test='${pageTitle == "Report"}'>active</c:if>">
+                <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-1">
+                    <path d="M17.6925 31.5H7.5C5.84315 31.5 4.5 30.1569 4.5 28.5V10.5C4.5 8.84315 5.84315 7.5 7.5 7.5H25.5C27.1569 7.5 28.5 8.84315 28.5 10.5V16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="27" cy="27" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M22.5 4.5V10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M10.5 4.5V10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M4.5 16.5H28.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M27 24.744V27L28.5 28.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                <span class="small">Report</span>
+            </a>
+        </li>
     </ul>
 
     <div class="d-flex flex-column align-items-center px-2 gap-1 text-center">
@@ -130,6 +145,21 @@
                         <path d="M27 24.744V27L28.5 28.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <span class="fw-medium">Elections</span>
+                </a>
+            </li>
+
+            <li class="nav-item w-100 mb-2">
+                <a href="${pageContext.request.contextPath}/report" 
+                   class="mobile-nav-link d-flex align-items-center gap-3 py-3 px-3 text-decoration-none rounded <c:if test='${pageTitle == "Report"}'>active</c:if>">
+                    <svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.6925 31.5H7.5C5.84315 31.5 4.5 30.1569 4.5 28.5V10.5C4.5 8.84315 5.84315 7.5 7.5 7.5H25.5C27.1569 7.5 28.5 8.84315 28.5 10.5V16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="27" cy="27" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M22.5 4.5V10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M10.5 4.5V10.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M4.5 16.5H28.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M27 24.744V27L28.5 28.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <span class="fw-medium">Report</span>
                 </a>
             </li>
         </ul>

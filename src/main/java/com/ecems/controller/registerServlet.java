@@ -105,11 +105,9 @@ public class registerServlet extends HttpServlet {
 
             if (studentDAO.createStudent(student) != null)
                 response.sendRedirect(request.getContextPath() + "/login");
-        } else {
-            request.setAttribute("errors", errors);
-            request.getRequestDispatcher("/views/register.jsp").forward(request, response);
-        }
+        } 
 
+        request.setAttribute("errors", errors);
+        request.getRequestDispatcher("/views/register.jsp").forward(request, response);
     }
-
 }

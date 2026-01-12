@@ -35,6 +35,7 @@
         FROM ELECTIONS E
         LEFT JOIN STAFFS S ON E.CREATED_BY = S.STAFF_ID
         WHERE (e.campus_id IS NULL OR e.campus_id = ?)
+        ORDER BY e.created_at DESC
         <sql:param value="${loggedUser.campus_id}" />
     </sql:query>
     
@@ -203,7 +204,7 @@
                             </tbody>
                         </table>
                     </div>
-                <!-- End Datatable -->
+                    <!-- End Datatable -->
 
                     
 

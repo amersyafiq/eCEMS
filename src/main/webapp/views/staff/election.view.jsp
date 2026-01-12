@@ -214,13 +214,13 @@
                                     <div id="collapseResults" class="accordion-collapse collapse" data-bs-parent="#electionAccordion">
                                         <div class="accordion-body bg-white px-0">
                                             <sql:query var="approvedCandidates" dataSource="${myDatasource}">
-                                                SELECT c.candidate_id, c.student_id, c.elected_position, s.full_name, s.stud_number, COUNT(v.student_id) as total_votes
-                                                FROM CANDIDATES c
-                                                JOIN STUDENTS s ON c.student_id = s.stud_id
-                                                LEFT JOIN VOTES v ON c.candidate_id = v.candidate_id
-                                                WHERE c.election_id = ?::bigint AND c.status = 'approved'
-                                                GROUP BY c.candidate_id, c.student_id, c.elected_position, s.full_name, s.stud_number
-                                                ORDER BY total_votes DESC
+                                                SELECT C.CANDIDATE_ID, C.STUDENT_ID, C.STATUS, C.SLOGAN, C.MANIFESTO, C.PHOTO_URL, C.BANNER_URL, S.FULL_NAME, S.STUD_NUMBER, COUNT(V.STUDENT_ID) AS TOTAL_VOTES
+                                                FROM CANDIDATES C
+                                                JOIN STUDENTS S ON C.STUDENT_ID = S.STUD_ID
+                                                LEFT JOIN VOTES V ON C.CANDIDATE_ID = V.CANDIDATE_ID
+                                                WHERE C.ELECTION_ID = ?::BIGINT AND C.STATUS = 'approved'
+                                                GROUP BY C.CANDIDATE_ID, C.STUDENT_ID, C.STATUS, C.SLOGAN, C.MANIFESTO, C.PHOTO_URL, C.BANNER_URL, S.FULL_NAME, S.STUD_NUMBER
+                                                ORDER BY TOTAL_VOTES DESC
                                                 <sql:param value="${election.election_id}"/>
                                             </sql:query>
 
@@ -238,7 +238,7 @@
                                                                     <th class="ps-4" scope="col" style="width: 5%;">#</th>
                                                                     <th scope="col" style="width: 35%;">Student Name</th>
                                                                     <th scope="col" style="width: 20%;">Student Number</th>
-                                                                    <th scope="col" style="width: 20%;">Position</th>
+                                                                    <th scope="col" style="width: 20%;">Profile</th>
                                                                     <th scope="col" style="width: 12%;">Total Votes</th>
                                                                     <th class="pe-4" scope="col" style="width: 8%;"></th>
                                                                 </tr>
@@ -249,13 +249,19 @@
                                                                         <td class="ps-4 text-dark">${loop.count}</td>
                                                                         <td class="text-dark">${candidate.full_name}</td>
                                                                         <td class="text-dark">${candidate.stud_number}</td>
-                                                                        <td class="text-dark">${candidate.elected_position}</td>
+                                                                        <td class="text-dark">
+                                                                            <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" 
+                                                                            data-bs-toggle="modal" data-bs-target="#candidateModal"
+                                                                            onclick="loadCandidateProfile(`${candidate.candidate_id}`, `${candidate.full_name}`, `${candidate.stud_number}`, `${candidate.status}`, `${candidate.slogan}`, `${candidate.manifesto}`, `${candidate.photo_url}`, `${candidate.banner_url}`)">
+                                                                            View Profile
+                                                                        </button>
+                                                                        </td>
                                                                         <td>
                                                                             <span class="badge bg-primary">${candidate.total_votes}</span>
                                                                         </td>
                                                                         <td class="pe-4">
                                                                             <c:if test="${loop.index == 0}">
-                                                                                <span class="badge bg-success">Leading</span>
+                                                                                <span class="badge bg-primary-subtle text-dark px-2">Leading</span>
                                                                             </c:if>
                                                                         </td>
                                                                     </tr>
@@ -482,21 +488,34 @@
 
         <script>
             function loadCandidateProfile(candidateId, fullName, studNumber, status, slogan, manifesto, photoUrl, bannerUrl) {
+                const defaultImg = 'https://placehold.co/600x400?text=No+Image';
+
+                $('#candidateIdHidden').val(candidateId);
                 $('#candidateName').text(fullName);
                 $('#candidateStudNumber').text('Student ID: ' + studNumber);
                 $('#candidateSlogan').text(slogan || 'No slogan provided');
                 $('#candidateManifesto').text(manifesto || 'No manifesto provided');
+
+                const $photo = $('#candidatePhoto');
+                $photo.off('error').on('error', function() {
+                    $(this).attr('src', defaultImg);
+                });
                 
-                if (photoUrl && photoUrl.trim()) {
-                    $('#candidatePhoto').attr('src', photoUrl);
+                if (photoUrl && photoUrl.trim() !== '') {
+                    $photo.attr('src', photoUrl);
                 } else {
-                    $('#candidatePhoto').attr('src', 'https://placehold.co/600x400?text=No+Image');
+                    $photo.attr('src', defaultImg);
                 }
 
-                if (bannerUrl && bannerUrl.trim()) {
-                    $('#bannerPhoto').attr('src', bannerUrl);
+                const $banner = $('#bannerPhoto');
+                $banner.off('error').on('error', function() {
+                    $(this).attr('src', defaultImg);
+                });
+
+                if (bannerUrl && bannerUrl.trim() !== '') {
+                    $banner.attr('src', bannerUrl);
                 } else {
-                    $('#bannerPhoto').attr('src', 'https://placehold.co/600x400?text=No+Image');
+                    $banner.attr('src', defaultImg);
                 }
 
                 let statusBadge = '';

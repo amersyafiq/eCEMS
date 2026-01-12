@@ -39,8 +39,12 @@
         FROM public.elections e
         LEFT JOIN public.candidates c ON e.election_id = c.election_id
         LEFT JOIN public.votes v ON c.candidate_id = v.candidate_id AND v.student_id = ?
-        WHERE (e.campus_id IS NULL OR e.campus_id = ?)
-        AND (e.faculty_id IS NULL OR e.faculty_id = ?)
+        WHERE e.campus_id = ?
+        AND (
+            (e.election_type = 'campus' AND e.faculty_id IS NULL)
+            OR
+            (e.election_type = 'faculty' AND e.faculty_id = ?)
+        )
         AND e.STATUS != 'cancelled'
         ORDER BY e.election_id, e.created_at DESC
         <sql:param value="${loggedUser.stud_id}" />
@@ -234,6 +238,11 @@
                                                     <span class="badge rounded-pill bg-white px-3 py-2 align-self-start fw-normal text-black border border-1 border-secondary">
                                                         Ending in ${election.ENDING_IN} days
                                                     </span>
+                                                    <c:if test="${election.vote_status == 'voted'}">
+                                                        <span class="badge rounded-pill bg-primary-subtle px-3 py-2 align-self-start fw-normal text-black border border-1 border-dark">
+                                                            Voted
+                                                        </span>
+                                                    </c:if>
                                                 </c:when>
                                                 <c:when test="${election.status == 'closed'}">
                                                     <span class="badge rounded-pill bg-white px-3 py-2 align-self-start fw-normal text-black border border-1 border-secondary">

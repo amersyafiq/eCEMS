@@ -448,7 +448,7 @@
                             <div class="row g-3">
                                 <div class="col-md-4 text-center">
                                     <div class="rounded-4 overflow-hidden mb-3" style="aspect-ratio: 1;">
-                                        <img id="candidatePhoto" src="https://placehold.co/600x400?text=No+Image'" alt="Candidate" class="w-100 h-100 object-fit-cover">
+                                        <img id="candidatePhoto" src="" alt="Candidate" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=No+Image';" class="w-100 h-100 object-fit-cover">
                                     </div>
                                 </div>
                                 <div class="col-md-8">
@@ -470,7 +470,7 @@
                                 <div class="col-12">
                                     <label class="form-label small fw-semibold">Campaign Banner</label>
                                     <div class="pt-1 rounded-4 overflow-hidden mb-3" style="aspect-ratio: 1;">
-                                        <img id="bannerPhoto" src="" alt="Banner" class="w-100 h-100 object-fit-cover">
+                                        <img id="bannerPhoto" src="" alt="Banner" onerror="this.onerror=null; this.src='https://placehold.co/600x400?text=No+Image';" class="w-100 h-100 object-fit-cover">
                                     </div>
                                 </div>
                             </div>
@@ -491,22 +491,34 @@
 
         <script>
             function loadCandidateProfile(candidateId, fullName, studNumber, status, slogan, manifesto, photoUrl, bannerUrl) {
+                const defaultImg = 'https://placehold.co/600x400?text=No+Image';
+
                 $('#candidateIdHidden').val(candidateId);
                 $('#candidateName').text(fullName);
                 $('#candidateStudNumber').text('Student ID: ' + studNumber);
                 $('#candidateSlogan').text(slogan || 'No slogan provided');
                 $('#candidateManifesto').text(manifesto || 'No manifesto provided');
+
+                const $photo = $('#candidatePhoto');
+                $photo.off('error').on('error', function() {
+                    $(this).attr('src', defaultImg);
+                });
                 
                 if (photoUrl && photoUrl.trim() !== '') {
-                    $('#candidatePhoto').attr('src', photoUrl);
+                    $photo.attr('src', photoUrl);
                 } else {
-                    $('#candidatePhoto').attr('src', 'https://placehold.co/600x400?text=No+Image');
+                    $photo.attr('src', defaultImg);
                 }
 
+                const $banner = $('#bannerPhoto');
+                $banner.off('error').on('error', function() {
+                    $(this).attr('src', defaultImg);
+                });
+
                 if (bannerUrl && bannerUrl.trim() !== '') {
-                    $('#bannerPhoto').attr('src', bannerUrl);
+                    $banner.attr('src', bannerUrl);
                 } else {
-                    $('#bannerPhoto').attr('src', 'https://placehold.co/600x400?text=No+Image');
+                    $banner.attr('src', defaultImg);
                 }
 
                 let statusBadge = '';

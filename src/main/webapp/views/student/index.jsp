@@ -33,34 +33,70 @@
                     <div class="mt-2">
                         <h3 class="h6 fw-bold text-dark text-uppercase mb-3">Recent Votes</h3>
 
-                        <div class="table-responsive mx-3">
-                            <table class="table table-borderless table-striped table-rounded mb-0" style="border-collapse: separate; border-spacing: 0 5px;">                                
-                                <thead class="text-secondary small fw-bold">
-                                    <tr>
-                                        <th class="ps-4" style="width: 50%;">ELECTIONS</th>
-                                        <th class="">VOTE</th>
-                                        <th class="text-end pe-4">DATE</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td class="py-2 ps-4 text-secondary fw-normal rounded-start-5">Jawatankuasa Perwakilan Pelajar Fakulti Sains Komputer dan Matematik</td>
-                                        <td class="py-2 text-secondary">2025148595</td>
-                                        <td class="py-2 text-end pe-4 text-secondary rounded-end-5">10, Jan 2020 20:07</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 ps-4 text-secondary fw-normal rounded-start-5">Jawatankuasa Perwakilan Kolej UiTM Shah Alam</td>
-                                        <td class="py-2 text-secondary">2025148599</td>
-                                        <td class="py-2 text-end pe-4 text-secondary rounded-end-5">11, Jan 2020 10:16</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="py-2 ps-4 text-secondary fw-normal rounded-start-5">Jawatankuasa Perwakilan Kolej UiTM Shah Alam</td>
-                                        <td class="py-2 text-secondary">2025148333</td>
-                                        <td class="py-2 text-end pe-4 text-secondary rounded-end-5">11, Jan 2020 10:16</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                        <sql:query dataSource="${myDatasource}" var="recentVotes">
+                            SELECT DISTINCT ON (v.CREATED_AT)
+                                e.ELECTION_ID, 
+                                e.TITLE, 
+                                v.CREATED_AT,
+                                s.STUD_NUMBER,
+                                e.ELECTION_TYPE,
+                                e.FACULTY_ID
+                            FROM VOTES v
+                            JOIN CANDIDATES c ON v.CANDIDATE_ID = c.CANDIDATE_ID
+                            JOIN ELECTIONS e ON c.ELECTION_ID = e.ELECTION_ID
+                            JOIN STUDENTS s ON v.STUDENT_ID = s.STUD_ID
+                            WHERE e.CAMPUS_ID = ?
+                            AND (
+                                (e.ELECTION_TYPE = 'campus')
+                                OR
+                                (e.ELECTION_TYPE = 'faculty' AND e.FACULTY_ID = ?)
+                            )
+                            AND e.STATUS != 'cancelled'
+                            ORDER BY v.CREATED_AT DESC
+                            LIMIT 5
+                            <sql:param value="${loggedUser.campus_id}" />
+                            <sql:param value="${loggedUser.faculty_id}" />
+                        </sql:query>
+
+                        <c:choose>
+                            <c:when test="${empty recentVotes.rows}">
+                                <div class="table-responsive mx-3">
+                                    <p class="text-muted text-center py-4">No active elections at this time.</p>
+                                </div>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="table-responsive mx-3">
+                                    <table class="table table-borderless table-striped table-rounded mb-0" style="border-collapse: separate; border-spacing: 0 5px;">                                
+                                        <thead class="text-secondary small fw-bold">
+                                            <tr>
+                                                <th class="ps-4" style="width: 50%;">ELECTIONS</th>
+                                                <th class="">VOTED BY</th>
+                                                <th class="">VOTE DATE</th>
+                                                <th class="pe-4 text-end">ACTION</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <c:forEach var="elec" items="${recentVotes.rows}">
+                                                <tr>
+                                                    <td class="py-2 ps-4 text-secondary fw-normal rounded-start-5">${elec.title}</td>
+                                                    <td class="py-2 text-secondary">${elec.stud_number}</td>
+                                                    <td class="py-2 text-secondary"><fmt:formatDate value="${elec.created_at}" pattern="dd, MMM yyyy HH:mm"/></td>
+                                                    <td class="py-2 text-end pe-4 text-secondary rounded-end-5">
+                                                        <a href="${pageContext.request.contextPath}/elections/page/${elec.election_id}" class="btn btn-sm btn-outline-primary rounded-pill px-3" >
+                                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <circle cx="9.99992" cy="10.0002" r="1.66667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                                <path d="M18.3334 9.99984C16.1109 13.889 13.3334 15.8332 10.0001 15.8332C6.66675 15.8332 3.88925 13.889 1.66675 9.99984C3.88925 6.11067 6.66675 4.1665 10.0001 4.1665C13.3334 4.1665 16.1109 6.11067 18.3334 9.99984" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                                            </svg>
+                                                            View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            </c:forEach>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
 
                     <div class="bg-primary-subtle rounded-4 p-4 px-5 d-flex align-items-center justify-content-between mt-auto">
@@ -80,10 +116,131 @@
 
                 </div>
 
-                <div class="d-none d-xl-block bg-white p-4 p-xl-5" style="width: 300px; min-width: 25%;">
+                <div class="d-none d-xl-block bg-white p-4 p-xl-5 overflow-auto no-scrollbar" style="width: 300px; min-width: 28%;">
                     <h3 class="h6 fw-bold text-dark text-uppercase">Statistics</h3>
-                    <hr class="text-muted">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #1e1b4b 0%, #2d2a5a 100%); border-radius: 1rem;">
+                            <sql:query dataSource="${myDatasource}" var="participatedElections">
+                                SELECT COUNT(DISTINCT e.ELECTION_ID) AS COUNT
+                                FROM VOTES v
+                                JOIN CANDIDATES c ON v.CANDIDATE_ID = c.CANDIDATE_ID
+                                JOIN ELECTIONS e ON c.ELECTION_ID = e.ELECTION_ID
+                                WHERE v.STUDENT_ID = ?
+                                AND e.CAMPUS_ID = ?
+                                AND (
+                                    (e.ELECTION_TYPE = 'campus')
+                                    OR
+                                    (e.ELECTION_TYPE = 'faculty' AND e.FACULTY_ID = ?)
+                                )
+                                <sql:param value="${loggedUser.stud_id}" />
+                                <sql:param value="${loggedUser.campus_id}" />
+                                <sql:param value="${loggedUser.faculty_id}" />
+                            </sql:query>
+                            <c:set var="participatedCount" value="${participatedElections.rows[0].count}" />
+                            <div class="card-body px-3 py-2">
+                                <div class="d-flex align-items-center justify-content-center gap-3 h-100 px-4">
+                                    <div class="me-auto">
+                                        <h3 class="h6 text-white fw-semibold mb-0">Elections</h3>
+                                        <p class="small text-white opacity-75 mb-0">You participated in</p>
+                                    </div>
+                                    <div class="display-4 fw-bold text-white">${participatedCount != null ? participatedCount : 0}</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    <h3 class="h6 fw-bold text-dark text-uppercase mb-2 mt-4">Participated Elections</h3>
+
+                    <sql:query dataSource="${myDatasource}" var="userParticipatedElections">
+                        SELECT DISTINCT ON (e.ELECTION_ID)
+                            e.ELECTION_ID, 
+                            e.TITLE, 
+                            e.STATUS, 
+                            e.CREATED_AT,
+                            MAX(v.CREATED_AT) as VOTED_AT
+                        FROM VOTES v
+                        JOIN CANDIDATES c ON v.CANDIDATE_ID = c.CANDIDATE_ID
+                        JOIN ELECTIONS e ON c.ELECTION_ID = e.ELECTION_ID
+                        WHERE v.STUDENT_ID = ?
+                        AND e.CAMPUS_ID = ?
+                        AND (
+                            (e.ELECTION_TYPE = 'campus')
+                            OR
+                            (e.ELECTION_TYPE = 'faculty' AND e.FACULTY_ID = ?)
+                        )
+                        GROUP BY e.ELECTION_ID, e.TITLE, e.STATUS, e.CREATED_AT
+                        ORDER BY e.ELECTION_ID, MAX(v.CREATED_AT) DESC
+                        LIMIT 5
+                        <sql:param value="${loggedUser.stud_id}" />
+                        <sql:param value="${loggedUser.campus_id}" />
+                        <sql:param value="${loggedUser.faculty_id}" />
+                    </sql:query>
+
+                    <c:choose>
+                        <c:when test="${empty userParticipatedElections.rows}">
+                            <div class="alert alert-info alert-sm rounded-3 py-2 px-3 small">
+                                <p class="mb-0">You haven't participated in any elections yet.</p>
+                            </div>
+                        </c:when>
+                        <c:otherwise>
+                            <div class="d-flex flex-column gap-2">
+                                <c:forEach var="elec" items="${userParticipatedElections.rows}">
+                                    <div class="card border-1 border-primary bg-primary-subtle shadow-sm rounded-3 p-3" style="cursor: pointer; transition: all 0.3s ease;" 
+                                        onclick="location.href='${pageContext.request.contextPath}/elections/page/${elec.election_id}'"
+                                        onmouseover="this.style.boxShadow='0 0.5rem 1rem rgba(0,0,0,0.15)'" 
+                                        onmouseout="this.style.boxShadow='0 0.125rem 0.25rem rgba(0,0,0,0.075)'">
+                                        <div class="d-flex align-items-start justify-content-between">
+                                            <div style="flex: 1;">
+                                                <h6 class="fw-semibold text-dark mb-1 small lh-sm text-truncate-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                                    ${elec.title}
+                                                </h6>
+                                                <p class="text-muted mb-0 small">
+                                                    <c:choose>
+                                                        <c:when test="${elec.status == 'upcoming'}">
+                                                            <span class="badge rounded-2 px-2 py-1" style="background-color: #4c3d99; color: white; font-size: 0.75rem; font-weight: 600; width: fit-content; ">
+                                                                Upcoming
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${elec.status == 'active'}">
+                                                            <span class="badge rounded-2 px-2 py-1" style="background-color: #7367F0; color: white; font-size: 0.75rem; font-weight: 600; width: fit-content; ">
+                                                                Active
+                                                            </span>
+                                                        </c:when>
+                                                        <c:when test="${elec.status == 'closed'}">
+                                                            <span class="badge rounded-2 px-2 py-1" style="background-color: #d4d4f7; color: #5b4fc9; font-size: 0.75rem; font-weight: 600; width: fit-content; ">
+                                                                Closed
+                                                            </span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge rounded-2 px-2 py-1" style="background-color: #9CA3AF; color: white; font-size: 0.75rem; font-weight: 600; width: fit-content; ">
+                                                                ${elec.status}
+                                                            </span>
+                                                        </c:otherwise>
+                                                    </c:choose>  
+                                                    <span class="text-muted ms-2">
+                                                        <c:set var="now" value="<%= new java.util.Date() %>" />
+                                                        <c:set var="diffTime" value="${now.time - elec.voted_at.time}" />
+                                                        <c:set var="diffDays" value="${diffTime / (1000 * 60 * 60 * 24)}" />
+                                                        <c:choose>
+                                                            <c:when test="${diffDays < 1}">Voted today</c:when>
+                                                            <c:when test="${diffDays < 2}">Voted 1 day ago</c:when>
+                                                            <c:when test="${diffDays < 7}">Voted <fmt:formatNumber value="${diffDays}" maxFractionDigits="0"/> days ago</c:when>
+                                                            <c:otherwise><fmt:formatDate value="${elec.voted_at}" pattern="MMM dd, yyyy"/></c:otherwise>
+                                                        </c:choose>
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </c:forEach>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+
+                    <div class="text-center mt-3">
+                        <a href="${pageContext.request.contextPath}/elections" class="small text-decoration-none text-primary fw-semibold">View More</a>
+                    </div>
+                </div>
 
             </main>
         </div>
